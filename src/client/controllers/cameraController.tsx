@@ -2,6 +2,9 @@ import { useCamera, useMountEffect } from "@rbxts/pretty-react-hooks";
 import React, { useEffect } from "@rbxts/react";
 import { RunService, UserInputService, Workspace } from "@rbxts/services";
 import { useInputDevice } from "client/hooks/useInputDevice";
+import { covenant } from "shared/covenant";
+import { IdPlayer } from "shared/covenant/components/_list";
+import { entityParts } from "shared/covenant/entityParts";
 
 const DISTANCE_MIN = 5;
 const DISTANCE_MAX = 25;
@@ -63,7 +66,14 @@ export function CameraController({ character }: { character: PVInstance }) {
             if (
                 distanceCorrectionResult !== undefined &&
                 distanceCorrectionResult.Instance.Transparency <= 0.1 &&
-                distanceCorrectionResult.Instance.CanCollide
+                distanceCorrectionResult.Instance.CanCollide &&
+                !(
+                    entityParts.get(distanceCorrectionResult.Instance) !== undefined &&
+                    covenant.worldGet(
+                        entityParts.get(distanceCorrectionResult.Instance)!,
+                        IdPlayer,
+                    ) !== undefined
+                )
             ) {
                 correctedDistance = math.max(
                     distanceCorrectionResult.Position.sub(_cframe.Position).Magnitude - 2,

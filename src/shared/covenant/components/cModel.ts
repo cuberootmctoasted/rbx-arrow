@@ -1,6 +1,6 @@
 import { covenant } from "shared/covenant";
 import { CollectionService, RunService, Workspace } from "@rbxts/services";
-import { CModel, IdPlayer } from "./_list";
+import { CModel, IdGrid, IdPlayer } from "./_list";
 import { InferComponent } from "@rbxts/covenant";
 import { CovenantHooks } from "@rbxts/covenant/src/hooks";
 
@@ -28,7 +28,7 @@ if (RunService.IsServer()) {
 
 covenant.defineComponent({
     component: CModel,
-    queriedComponents: [[IdPlayer]], // add relevant components here
+    queriedComponents: [[IdPlayer], [IdGrid]], // add relevant components here
     replicated: true,
     predictionValidator: () => true,
     recipe: (entity, lastState, updateId, { useEvent, useImperative }) => {
@@ -99,6 +99,9 @@ covenant.defineComponent({
                 return processPlayerModel(covenant.worldGet(entity, IdPlayer)!, updateId, useEvent);
             }
             // this is where other entities where the physical model is in the game and the id component exists
+            if (covenant.worldHas(entity, IdGrid)) {
+                return covenant.worldGet(entity, IdGrid)!.data;
+            }
         }
 
         return undefined;
