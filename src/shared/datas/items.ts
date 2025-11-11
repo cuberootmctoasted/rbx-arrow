@@ -1,5 +1,6 @@
 import { ReplicatedStorage } from "@rbxts/services";
 import variantModule, { fields, TypeNames, variant, VariantOf } from "@rbxts/variant";
+import { BASIC_COLLECTOR, BASIC_DROPPER, SMALL_CONVEYOR } from "shared/constants/assets";
 import { path } from "shared/utils/path";
 
 export const ItemVariant = variantModule({
@@ -25,17 +26,17 @@ const asItemProperty = (data: ItemProperty) => data;
 export const Items = {
     basicDropper: asItemProperty({
         displayName: "Basic Dropper",
-        origin: path(ReplicatedStorage, "assets/models/BasicDropper", "PVInstance"),
+        origin: BASIC_DROPPER,
         variant: ItemVariant.dropper({ todo: true }),
     }),
     basicCollector: asItemProperty({
         displayName: "Basic Collector",
-        origin: path(ReplicatedStorage, "assets/models/BasicCollector", "PVInstance"),
+        origin: BASIC_COLLECTOR,
         variant: ItemVariant.collector({ todo: true }),
     }),
     smallConveyor: asItemProperty({
         displayName: "Small Conveyor",
-        origin: path(ReplicatedStorage, "assets/models/SmallConveyor", "PVInstance"),
+        origin: SMALL_CONVEYOR,
         variant: ItemVariant.conveyor({ todo: true }),
     }),
 };

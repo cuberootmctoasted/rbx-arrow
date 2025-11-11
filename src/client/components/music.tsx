@@ -5,9 +5,10 @@ import { SoundService } from "@rbxts/services";
 interface MusicProps {
     soundId: string;
     volume: number | React.Binding<number>;
+    speed: number | React.Binding<number>;
 }
 
-export function Music({ soundId, volume }: MusicProps) {
+export function Music({ soundId, volume, speed }: MusicProps) {
     const instance = useMemo(() => {
         const inst = new Instance("Sound");
         inst.Parent = SoundService;
@@ -30,6 +31,16 @@ export function Music({ soundId, volume }: MusicProps) {
             instance.TimePosition = 0;
         }
         instance.Volume = vol;
+    });
+
+    useBindingListener(speed, (spd) => {
+        if (spd > 0.03) {
+            instance.Playing = true;
+        } else {
+            instance.Playing = false;
+            instance.TimePosition = 0;
+        }
+        instance.PlaybackSpeed = spd;
     });
 
     useUnmountEffect(() => {

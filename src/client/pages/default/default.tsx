@@ -12,6 +12,7 @@ import { GridEditor } from "./gridEditor/gridEditor";
 import { covenant } from "shared/covenant";
 import { Entity } from "@rbxts/covenant";
 import { ClassicCameraController } from "client/controllers/classicCameraController";
+import { DayNightMusic } from "./dayNightMusic";
 
 export function DefaultPage() {
     const playerEntity = usePlayerEntity();
@@ -52,6 +53,7 @@ export function DefaultPage() {
             {visible && character && <ClassicCameraController character={character} />}
             {visible && humanoid && <MovementController humanoid={humanoid} />}
             {visible && grid !== undefined && <GridEditor grid={grid} />}
+            {visible && <DayNightMusic />}
         </Screen>
     );
 }
