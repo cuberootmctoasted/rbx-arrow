@@ -17,7 +17,7 @@ import { DayNightMusic } from "./dayNightMusic";
 export function DefaultPage() {
     const playerEntity = usePlayerEntity();
     const page = useComponent(playerEntity, CPage);
-    const visible = useMemo(() => page === "placeholder", [page]);
+    const visible = useMemo(() => page === "playing", [page]);
     const direction = useMemo(() => (visible ? "in" : "out"), [visible]);
     const transition = useTransition(visible, {
         in: MotionVariantOptions.spring({}),

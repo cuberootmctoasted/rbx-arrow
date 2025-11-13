@@ -1,7 +1,7 @@
 import { covenant } from "shared/covenant";
 import { CollectionService, RunService, Workspace } from "@rbxts/services";
 import { CModel, IdGrid, IdPlayer } from "./_list";
-import { InferComponent } from "@rbxts/covenant";
+import { Entity, InferComponent } from "@rbxts/covenant";
 import { CovenantHooks } from "@rbxts/covenant/src/hooks";
 
 export function processPlayerModel(
@@ -15,14 +15,14 @@ export function processPlayerModel(
     return player.Character;
 }
 
-const ENTITY_ATTRIBUTE_NAME = "__ENTITY__";
+const SERVER_ENTITY_ATTRIBUTE_NAME = "__SERVER_ENTITY__";
 const STREAMABLE_TAG_NAME = "__STREAMABLE__";
 
 if (RunService.IsServer()) {
     covenant.subscribeComponent(CModel, (entity, instance) => {
         if (instance === undefined) return;
         instance.AddTag(STREAMABLE_TAG_NAME);
-        instance.SetAttribute(ENTITY_ATTRIBUTE_NAME, entity);
+        instance.SetAttribute(SERVER_ENTITY_ATTRIBUTE_NAME, entity);
     });
 }
 
@@ -42,34 +42,44 @@ covenant.defineComponent({
                 }
 
                 CollectionService.GetTagged(STREAMABLE_TAG_NAME).forEach((instance) => {
-                    const entity = instance.GetAttribute(ENTITY_ATTRIBUTE_NAME) as
-                        | number
+                    const serverEntity = instance.GetAttribute(SERVER_ENTITY_ATTRIBUTE_NAME) as
+                        | Entity
                         | undefined;
+                    if (serverEntity === undefined) return;
+                    const entity = covenant.getClientEntity(serverEntity);
                     if (entity === undefined) return;
                     streamMap.set(tostring(entity), instance as PVInstance);
-                    //print(`Stream in ${entity}: ${instance.GetFullName()}`);
+                    print(`Stream in ${serverEntity}-${entity}: ${instance.GetFullName()}`);
                     indicateUpdate();
                 });
 
                 const instancedAddedConnection = CollectionService.GetInstanceAddedSignal(
                     STREAMABLE_TAG_NAME,
                 ).Connect((instance) => {
-                    const entity = instance.GetAttribute(ENTITY_ATTRIBUTE_NAME) as
-                        | number
+                    const serverEntity = instance.GetAttribute(SERVER_ENTITY_ATTRIBUTE_NAME) as
+                        | Entity
                         | undefined;
+                    if (serverEntity === undefined) return;
+                    const entity = covenant.getClientEntity(serverEntity);
                     if (entity === undefined) return;
                     streamMap.set(tostring(entity), instance as PVInstance);
-                    //print(`Stream in ${entity}: ${instance.GetFullName()}`);
+                    print(`Stream in ${serverEntity}-${entity}: ${instance.GetFullName()}`);
                     indicateUpdate();
                 });
 
                 const instanceRemovedConnection = CollectionService.GetInstanceRemovedSignal(
                     STREAMABLE_TAG_NAME,
                 ).Connect((instance) => {
-                    streamMap.forEach((model, key) => {
+                    streamMap.forEach((model, stringifiedServerEntity) => {
                         if (model !== instance) return;
-                        streamMap.delete(key);
-                        //print(`Stream out ${key}: ${instance.GetFullName()}`);
+                        const entity = covenant.getClientEntity(
+                            tonumber(stringifiedServerEntity) as Entity,
+                        );
+                        if (entity === undefined) return;
+                        streamMap.delete(tostring(entity));
+                        print(
+                            `Stream out ${stringifiedServerEntity}-${entity}: ${instance.GetFullName()}`,
+                        );
                     });
                     indicateUpdate();
                 });

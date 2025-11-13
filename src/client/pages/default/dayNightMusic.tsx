@@ -1,4 +1,10 @@
-import { useEventListener, useLatest, useSpring } from "@rbxts/pretty-react-hooks";
+import {
+    lerp,
+    lerpBinding,
+    useEventListener,
+    useLatest,
+    useSpring,
+} from "@rbxts/pretty-react-hooks";
 import React, { useEffect, useMemo, useState } from "@rbxts/react";
 import { RunService } from "@rbxts/services";
 import { Music } from "client/components/music";
@@ -14,15 +20,23 @@ function getIsDay() {
 export function DayNightMusic() {
     const [isDay, setIsDay] = useState(getIsDay());
     const latestIsDay = useLatest(isDay);
-    const dayMusicOrigin = useMemo(() => {
-        return DAY_MUSICS[math.random(0, DAY_MUSICS.size() - 1)];
-    }, [isDay]);
-    const nightMusicOrigin = useMemo(() => {
-        return NIGHT_MUSICS[math.random(0, NIGHT_MUSICS.size() - 1)];
-    }, [isDay]);
+    const [dayMusicOrigin, setDayMusicOrigin] = useState(
+        DAY_MUSICS[math.random(0, DAY_MUSICS.size() - 1)],
+    );
+    const [nightMusicOrigin, setNightMusicOrigin] = useState(
+        NIGHT_MUSICS[math.random(0, NIGHT_MUSICS.size() - 1)],
+    );
 
-    const dayMusicVolume = useSpring(isDay ? dayMusicOrigin.Volume : 0, { frequency: 5 });
-    const nightMusicVolume = useSpring(isDay ? 0 : nightMusicOrigin.Volume, { frequency: 5 });
+    const dayMusicVolume = useSpring(isDay ? 1 : 0, { frequency: 10 });
+    const nightMusicVolume = useSpring(isDay ? 0 : 1, { frequency: 10 });
+
+    useEffect(() => {
+        if (isDay) {
+            setDayMusicOrigin(DAY_MUSICS[math.random(0, DAY_MUSICS.size() - 1)]);
+        } else {
+            setNightMusicOrigin(NIGHT_MUSICS[math.random(0, NIGHT_MUSICS.size() - 1)]);
+        }
+    }, [isDay]);
 
     useEventListener(RunService.Heartbeat, () => {
         const newIsDay = getIsDay();
@@ -34,12 +48,12 @@ export function DayNightMusic() {
         <>
             <Music
                 soundId={dayMusicOrigin.SoundId}
-                volume={dayMusicVolume}
+                volume={lerpBinding(dayMusicVolume, 0, dayMusicOrigin.Volume)}
                 speed={dayMusicOrigin.PlaybackSpeed}
             />
             <Music
                 soundId={nightMusicOrigin.SoundId}
-                volume={nightMusicVolume}
+                volume={lerpBinding(nightMusicVolume, 0, nightMusicOrigin.Volume)}
                 speed={nightMusicOrigin.PlaybackSpeed}
             />
         </>

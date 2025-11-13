@@ -1,1 +1,1 @@
-export type Page = "placeholder" | "placeholder2";
+export type Page = "playing" | "preload";

@@ -17,8 +17,11 @@ covenant.defineComponent({
             return lastState;
         }
 
-        // where logic for the pages happen
+        const inputs = covenant.worldGet(entity, CInputs);
+        if (!inputs?.preloaded) {
+            return "preload";
+        }
 
-        return "placeholder";
+        return "playing";
     },
 });

@@ -24,7 +24,7 @@ export function Music({ soundId, volume, speed }: MusicProps) {
     }, [soundId]);
 
     useBindingListener(volume, (vol) => {
-        if (vol > 0.03) {
+        if (vol > 0.003) {
             instance.Playing = true;
         } else {
             instance.Playing = false;

@@ -13,10 +13,11 @@
     "type": "commonjs",
     "devDependencies": {
         "@rbxts/compiler-types": "^3.0.0-types.0",
-        "@rbxts/types": "^1.0.888",
-        "@typescript-eslint/eslint-plugin": "^8.46.2",
-        "@typescript-eslint/parser": "^8.46.2",
-        "eslint": "^9.38.0",
+        "@rbxts/covenant": "^2.1.1",
+        "@rbxts/types": "^1.0.890",
+        "@typescript-eslint/eslint-plugin": "^8.46.4",
+        "@typescript-eslint/parser": "^8.46.4",
+        "eslint": "^9.39.1",
         "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-prettier": "^5.5.4",
         "eslint-plugin-roblox-ts": "^1.2.1",
@@ -26,7 +27,6 @@
     },
     "dependencies": {
         "@rbxts/altmake": "^0.1.5",
-        "@rbxts/covenant": "^2.0.2",
         "@rbxts/lapis": "^0.3.8",
         "@rbxts/pretty-react-hooks": "^0.6.4",
         "@rbxts/react": "^17.2.3",
