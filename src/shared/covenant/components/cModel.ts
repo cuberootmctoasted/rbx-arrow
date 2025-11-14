@@ -1,8 +1,10 @@
 import { covenant } from "shared/covenant";
 import { CollectionService, RunService, Workspace } from "@rbxts/services";
-import { CModel, IdGrid, IdPlayer } from "./_list";
+import { CModel, IdGrid, IdPlacement, IdPlayer } from "./_list";
 import { Entity, InferComponent } from "@rbxts/covenant";
 import { CovenantHooks } from "@rbxts/covenant/src/hooks";
+import { Items } from "shared/datas/items";
+import { getPlacementCf } from "shared/datas/placement";
 
 export function processPlayerModel(
     player: InferComponent<typeof IdPlayer>,
@@ -28,7 +30,7 @@ if (RunService.IsServer()) {
 
 covenant.defineComponent({
     component: CModel,
-    queriedComponents: [[IdPlayer], [IdGrid]], // add relevant components here
+    queriedComponents: [[IdPlayer], [IdGrid], [IdPlacement]], // add relevant components here
     replicated: true,
     predictionValidator: () => true,
     recipe: (entity, lastState, updateId, { useEvent, useImperative }) => {
@@ -111,6 +113,17 @@ covenant.defineComponent({
             // this is where other entities where the physical model is in the game and the id component exists
             if (covenant.worldHas(entity, IdGrid)) {
                 return covenant.worldGet(entity, IdGrid)!.data;
+            }
+            if (covenant.worldHas(entity, IdPlacement)) {
+                const placement = covenant.worldGet(entity, IdPlacement)!;
+                const grid = placement.grid;
+                const gridModel = covenant.worldGet(grid, CModel);
+                if (gridModel === undefined) return undefined;
+                const model = Items[placement.itemName].origin.Clone();
+                model.Parent = Workspace;
+                model.PivotTo(getPlacementCf(gridModel.GetPivot(), placement.position));
+                print(model.GetFullName());
+                return model;
             }
         }
 

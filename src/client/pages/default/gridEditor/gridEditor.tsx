@@ -1,5 +1,5 @@
 import { Entity } from "@rbxts/covenant";
-import React, { useMemo, useState } from "@rbxts/react";
+import React, { useEffect, useMemo, useState } from "@rbxts/react";
 import { useComponent } from "client/hooks/useComponent";
 import { usePlayerEntity } from "client/hooks/usePlayerEntity";
 import { CInventory } from "shared/covenant/components/_list";
@@ -52,6 +52,17 @@ export function GridEditor({ grid }: { grid: Entity }) {
     const inventory = useComponent(playerEntity, CInventory);
     const [selectedItemGuid, setSelectedItemGuid] = useState<string | undefined>();
 
+    useEffect(() => {
+        if (inventory === undefined) {
+            setSelectedItemGuid(undefined);
+            return;
+        }
+        if (selectedItemGuid !== undefined && !inventory.has(selectedItemGuid)) {
+            setSelectedItemGuid(undefined);
+            return;
+        }
+    }, [inventory, selectedItemGuid]);
+
     const elements = useMemo(() => {
         const map: Map<string, React.Element> = new Map();
         inventory?.forEach((itemName, guid) => {
@@ -71,7 +82,7 @@ export function GridEditor({ grid }: { grid: Entity }) {
 
     return (
         <>
-            {selectedItemGuid !== undefined && (
+            {selectedItemGuid !== undefined && inventory?.has(selectedItemGuid) && (
                 <Dragger
                     grid={grid}
                     itemGuid={selectedItemGuid}

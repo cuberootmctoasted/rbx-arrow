@@ -21,3 +21,9 @@ export const IdGrid = covenant.worldComponent<{ data?: PVInstance }>();
 export const CGrid = covenant.worldComponent<{ size: Vector2; owner?: Entity }>();
 
 export const CInventory = covenant.worldComponent<ReadonlyMap<string, ItemName>>();
+
+export const IdPlacement = covenant.worldComponent<{
+    grid: Entity;
+    position: Vector2;
+    itemName: ItemName;
+}>();

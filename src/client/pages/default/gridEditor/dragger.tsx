@@ -1,11 +1,15 @@
-import { Entity } from "@rbxts/covenant";
+import { Entity, world } from "@rbxts/covenant";
 import { getBindingValue, useBindingListener, useLatest } from "@rbxts/pretty-react-hooks";
 import React, { useBinding, useEffect, useMemo, useReducer, useRef, useState } from "@rbxts/react";
-import { Players, RunService, Workspace } from "@rbxts/services";
+import { Players, RunService, UserInputService, Workspace } from "@rbxts/services";
 import { useComponent } from "client/hooks/useComponent";
 import { ERR_1, OK_1 } from "shared/constants/themes";
-import { CGrid, CModel } from "shared/covenant/components/_list";
+import { covenant } from "shared/covenant";
+import { CGrid, CModel, IdPlacement } from "shared/covenant/components/_list";
+import { entityParts } from "shared/covenant/entityParts";
 import { ItemName, Items } from "shared/datas/items";
+import { getPlacementCf } from "shared/datas/placement";
+import { updateInputs } from "shared/inputs";
 import { getPvPrimaryPart } from "shared/utils/pvUtils";
 
 function setModelTransparency(model: PVInstance, transparency: number) {
@@ -52,10 +56,10 @@ export function Dragger({
     }, []);
     const [hoveringPosition, setHoveringPosition] = useBinding<Vector2>(Vector2.zero);
 
-    const hoveringAbsolutePosition = hoveringPosition.map((v) => {
-        if (gridPv === undefined) return Vector3.zero;
+    const hoveringAbsoluteCf = hoveringPosition.map((v) => {
+        if (gridPv === undefined) return CFrame.identity;
         const cf = gridPv.GetPivot();
-        return cf.Position.add(cf.LookVector.mul(-v.Y)).add(cf.RightVector.mul(v.X));
+        return getPlacementCf(cf, v);
     });
 
     const model = useMemo(() => {
@@ -66,8 +70,52 @@ export function Dragger({
         return p;
     }, [itemName]);
 
-    const [canPlace, setCanPlace] = useState(false);
+    const [canPlace, setCanPlace] = useState(true);
     const latestCanPlace = useLatest(canPlace);
+
+    useEffect(() => {
+        const extentSize = model.IsA("Model")
+            ? model.GetExtentsSize()
+            : model.IsA("BasePart")
+              ? model.ExtentsSize
+              : Vector3.zero;
+        const params = new OverlapParams();
+        params.FilterType = Enum.RaycastFilterType.Exclude;
+        params.AddToFilter(model);
+        const connection = RunService.Heartbeat.Connect(() => {
+            const parts = Workspace.GetPartBoundsInBox(model.GetPivot(), extentSize);
+            let willCanPlace = true;
+            parts.forEach((part) => {
+                if (!willCanPlace) return;
+                const e = entityParts.get(part);
+                if (e === undefined) return;
+                if (!covenant.worldHas(e, IdPlacement)) return;
+                willCanPlace = false;
+            });
+            if (willCanPlace && !latestCanPlace.current) {
+                setCanPlace(true);
+            }
+            if (!willCanPlace && latestCanPlace.current) {
+                setCanPlace(false);
+            }
+        });
+
+        return () => {
+            connection.Disconnect();
+        };
+    }, [model]);
+
+    useEffect(() => {
+        if (!canPlace) return;
+        const connection = mouse.Button1Down.Connect(() => {
+            updateInputs((inputs) => {
+                inputs.place = { guid: itemGuid, position: getBindingValue(hoveringPosition) };
+            });
+        });
+        return () => {
+            connection.Disconnect();
+        };
+    }, [canPlace, itemGuid]);
 
     useEffect(() => {
         if (canPlace) {
@@ -84,9 +132,9 @@ export function Dragger({
     }, [itemName]);
 
     const latestGridPv = useLatest(gridPv);
-    useBindingListener(hoveringAbsolutePosition, (v) => {
+    useBindingListener(hoveringAbsoluteCf, (v) => {
         if (latestGridPv.current === undefined) return;
-        model.PivotTo(latestGridPv.current.GetPivot().Rotation.add(v.add(new Vector3(0, 1, 0))));
+        model.PivotTo(v);
     });
 
     const temp = useRef(Vector3.zero);

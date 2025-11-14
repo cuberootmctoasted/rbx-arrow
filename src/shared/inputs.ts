@@ -4,6 +4,10 @@ import Sift from "@rbxts/sift";
 // preferrably all client server communications are defined here
 export interface Inputs {
     preloaded: boolean;
+    place?: {
+        guid: string;
+        position: Vector2;
+    };
 }
 
 let inputs: Inputs = { preloaded: false };
