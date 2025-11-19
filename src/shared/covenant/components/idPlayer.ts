@@ -1,27 +1,25 @@
 import { Players, RunService } from "@rbxts/services";
 import { covenant } from "..";
 import { IdPlayer } from "./_list";
+import { selfDisconnectConnection } from "shared/utils/selfDisconnectConnection";
 
 covenant.defineIdentity({
     identityComponent: IdPlayer,
     replicated: true,
-    recipe: (entities, updateId, { useEvent, useChange }) => {
+    lifetime: (entity, player, despawn) => {
+        const connection = Players.PlayerRemoving.Connect((plr) => {
+            if (player !== plr) return;
+            despawn();
+        });
+        return () => {
+            connection.Disconnect();
+        };
+    },
+    factory: (spawnEntity) => {
         if (!RunService.IsServer()) return;
 
-        const playersAdded = useEvent(updateId, Players, Players.PlayerAdded).map(
-            ([player]) => player,
-        );
-
-        if (useChange(updateId, [], "Once")) {
-            Players.GetPlayers().forEach((player) => {
-                playersAdded.push(player);
-            });
-        }
-
-        const playersRemoved = useEvent(updateId, Players, Players.PlayerRemoving).map(
-            ([player]) => player,
-        );
-
-        return { statesToCreate: playersAdded, statesToDelete: playersRemoved };
+        Players.PlayerAdded.Connect((player) => {
+            spawnEntity(player);
+        });
     },
 });

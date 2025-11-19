@@ -3,10 +3,6 @@ import { covenant } from "../covenant";
 import { CInputs, CInventory, IdPlayer } from "./_list";
 import Immut from "@rbxts/immut";
 
-covenant.subscribeComponent(CInventory, (entity, state) => {
-    print(state);
-});
-
 covenant.defineComponent({
     component: CInventory,
     queriedComponents: [[IdPlayer]],
@@ -30,7 +26,6 @@ covenant.defineComponent({
         const inputs = covenant.worldGet(entity, CInputs);
 
         if (useChange(updateId, [inputs?.place], tostring(entity)) && inputs?.place !== undefined) {
-            print("heondesotnde");
             return Immut.produce(lastState, (draft) => {
                 draft.delete(inputs.place!.guid);
             });

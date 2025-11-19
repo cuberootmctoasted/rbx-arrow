@@ -1,6 +1,12 @@
 import { lerpBinding, useAsync, useInterval, useMotion } from "@rbxts/pretty-react-hooks";
 import React, { useBinding, useEffect, useMemo, useState } from "@rbxts/react";
-import { ContentProvider, Players, ReplicatedStorage, Workspace } from "@rbxts/services";
+import {
+    ContentProvider,
+    Players,
+    ReplicatedStorage,
+    RunService,
+    Workspace,
+} from "@rbxts/services";
 import { Screen } from "client/components/screen";
 import { Transition } from "client/components/transition";
 import { useComponent } from "client/hooks/useComponent";
@@ -26,13 +32,33 @@ export function Preload() {
 
     const [rotation, rotationApi] = useMotion(0);
 
+    const rng = useMemo(() => {
+        return math.random() <= 0.1;
+    }, []);
+
     useInterval(
         () => {
+            if (rng) return;
             rotationApi.immediate(0);
             rotationApi.spring(360, { frequency: 2 });
         },
         !ready ? 2 : undefined,
     );
+
+    const [scale, setScale] = useBinding(0);
+    const [offset, setOffset] = useBinding(new UDim2(0, 0, 0, 0));
+
+    useEffect(() => {
+        if (!rng) return;
+        const connection = RunService.Heartbeat.Connect(() => {
+            setScale(math.random() / 2);
+            setOffset(new UDim2((math.random() - 0.5) / 2, 0, (math.random() - 0.5) / 2, 0));
+            rotationApi.immediate(math.random(0, 360));
+        });
+        return () => {
+            connection.Disconnect();
+        };
+    }, [rng]);
 
     useAsync(async () => {
         if (!visible) return;
@@ -45,7 +71,7 @@ export function Preload() {
             });
         }
         ContentProvider.PreloadAsync(ASSETS);
-        task.wait(2);
+        task.wait(5);
         setReady(true);
         task.wait(1);
         updateInputs((inputs) => {
@@ -65,11 +91,14 @@ export function Preload() {
                     <imagelabel
                         BackgroundTransparency={1}
                         BorderSizePixel={0}
-                        Image={"rbxassetid://129387349650067"}
+                        Image={"rbxassetid://139833628343860"}
                         Rotation={rotation}
-                        Size={new UDim2(0, 100, 0, 100)}
+                        Size={scale.map((v) => new UDim2(v, 100, v, 100))}
                         AnchorPoint={new Vector2(0.5, 0.5)}
-                        Position={new UDim2(0.5, 0, 0.5, 0)}
+                        Position={offset.map(
+                            (v) =>
+                                new UDim2(0.5 + v.X.Scale, v.X.Offset, 0.5 + v.Y.Scale, v.Y.Offset),
+                        )}
                     ></imagelabel>
                 </frame>
             </Transition>

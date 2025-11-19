@@ -1,49 +1,40 @@
 import { RunService } from "@rbxts/services";
 import { covenant } from "../covenant";
-import { CGrid, CInputs, CInventory, IdGrid, IdPlacement } from "./_list";
-import { Entity, InferComponent } from "@rbxts/covenant";
+import { CGrid, CInputs, CInventory, CModel, CRoundSystem, IdPlacement } from "./_list";
+import { Entity } from "@rbxts/covenant";
 
-covenant.subscribeComponent(IdPlacement, (entity, state) => {
-    print(state);
-});
+//trackComponent(IdPlacement, "IdPlacement");
 
 covenant.defineIdentity({
     identityComponent: IdPlacement,
     replicated: true,
-    recipe: (entities, updateId, { useComponentChange, useImperative }) => {
+    lifetime: (entity, state, despawn) => {
+        const unsubscribe = covenant.subscribeComponent(CRoundSystem, (_, roundSystem) => {
+            if (roundSystem?.loadingIntermission === undefined) return;
+            const model = covenant.worldGet(entity, CModel);
+            model?.Destroy();
+            despawn();
+        });
+        return () => {
+            unsubscribe();
+        };
+    },
+    factory: (spawnEntity) => {
         if (!RunService.IsServer()) return;
 
-        const statesToCreate: InferComponent<typeof IdPlacement>[] = [];
+        const ownerGridMap: Map<string, Entity> = new Map();
+        covenant.subscribeComponent(CGrid, (entity, state, previousState) => {
+            if (state === undefined) {
+                if (previousState?.ownerServerEntity !== undefined) {
+                    ownerGridMap.delete(tostring(previousState.ownerServerEntity));
+                }
+                return;
+            }
+            if (state.ownerServerEntity === undefined) return;
+            ownerGridMap.set(tostring(state.ownerServerEntity), entity);
+        });
 
-        const ownerGridMap = useImperative(
-            updateId,
-            () => {
-                const map: Map<string, Entity> = new Map();
-                const unsubscribe = covenant.subscribeComponent(
-                    CGrid,
-                    (entity, state, previousState) => {
-                        if (state === undefined) {
-                            if (previousState?.owner !== undefined) {
-                                map.delete(tostring(previousState.owner));
-                            }
-                            return;
-                        }
-                        if (state.owner === undefined) return;
-                        map.set(tostring(state.owner), entity);
-                    },
-                );
-                return {
-                    value: map,
-                    cleanup: () => {
-                        unsubscribe();
-                    },
-                };
-            },
-            [],
-            "OwnerGrid",
-        );
-
-        useComponentChange(updateId, CInputs).forEach(({ entity, state }) => {
+        covenant.subscribeComponent(CInputs, (entity, state) => {
             if (state?.place === undefined) return;
             const inventory = covenant.worldGet(entity, CInventory);
             if (inventory === undefined) return;
@@ -51,9 +42,11 @@ covenant.defineIdentity({
             if (itemName === undefined) return;
             const grid = ownerGridMap.get(tostring(entity));
             if (grid === undefined) return;
-            statesToCreate.push({ itemName: itemName, position: state.place.position, grid: grid });
+            spawnEntity({
+                itemName: itemName,
+                position: state.place.position,
+                gridServerEntity: grid,
+            });
         });
-
-        return { statesToCreate };
     },
 });

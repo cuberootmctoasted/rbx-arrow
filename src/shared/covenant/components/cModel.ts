@@ -17,8 +17,8 @@ export function processPlayerModel(
     return player.Character;
 }
 
-const SERVER_ENTITY_ATTRIBUTE_NAME = "__SERVER_ENTITY__";
-const STREAMABLE_TAG_NAME = "__STREAMABLE__";
+export const SERVER_ENTITY_ATTRIBUTE_NAME = "__SERVER_ENTITY__";
+export const STREAMABLE_TAG_NAME = "__STREAMABLE__";
 
 if (RunService.IsServer()) {
     covenant.subscribeComponent(CModel, (entity, instance) => {
@@ -34,9 +34,11 @@ covenant.defineComponent({
     replicated: true,
     predictionValidator: () => true,
     recipe: (entity, lastState, updateId, { useEvent, useImperative }) => {
+        useEvent(updateId, RunService, RunService.Heartbeat);
+
         const streamMap = useImperative(
             updateId,
-            (indicateUpdate) => {
+            () => {
                 const streamMap: Map<string, PVInstance> = new Map();
 
                 if (!RunService.IsClient()) {
@@ -52,7 +54,6 @@ covenant.defineComponent({
                     if (entity === undefined) return;
                     streamMap.set(tostring(entity), instance as PVInstance);
                     print(`Stream in ${serverEntity}-${entity}: ${instance.GetFullName()}`);
-                    indicateUpdate();
                 });
 
                 const instancedAddedConnection = CollectionService.GetInstanceAddedSignal(
@@ -66,7 +67,6 @@ covenant.defineComponent({
                     if (entity === undefined) return;
                     streamMap.set(tostring(entity), instance as PVInstance);
                     print(`Stream in ${serverEntity}-${entity}: ${instance.GetFullName()}`);
-                    indicateUpdate();
                 });
 
                 const instanceRemovedConnection = CollectionService.GetInstanceRemovedSignal(
@@ -83,7 +83,6 @@ covenant.defineComponent({
                             `Stream out ${stringifiedServerEntity}-${entity}: ${instance.GetFullName()}`,
                         );
                     });
-                    indicateUpdate();
                 });
 
                 return {
@@ -97,6 +96,7 @@ covenant.defineComponent({
             [],
             "streamMap",
         );
+
         if (RunService.IsClient() && lastState === undefined) {
             const instance = streamMap.get(tostring(entity));
             if (instance === undefined) return undefined;
@@ -116,7 +116,7 @@ covenant.defineComponent({
             }
             if (covenant.worldHas(entity, IdPlacement)) {
                 const placement = covenant.worldGet(entity, IdPlacement)!;
-                const grid = placement.grid;
+                const grid = placement.gridServerEntity;
                 const gridModel = covenant.worldGet(grid, CModel);
                 if (gridModel === undefined) return undefined;
                 const model = Items[placement.itemName].origin.Clone();

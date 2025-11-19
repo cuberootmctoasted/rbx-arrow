@@ -18,12 +18,26 @@ export interface RepFocusData {
 export const IdRepFocus = covenant.worldComponent<RepFocusData>();
 
 export const IdGrid = covenant.worldComponent<{ data?: PVInstance }>();
-export const CGrid = covenant.worldComponent<{ size: Vector2; owner?: Entity }>();
+export const CGrid = covenant.worldComponent<{ size: Vector2; ownerServerEntity?: Entity }>();
 
 export const CInventory = covenant.worldComponent<ReadonlyMap<string, ItemName>>();
 
 export const IdPlacement = covenant.worldComponent<{
-    grid: Entity;
+    gridServerEntity: Entity;
     position: Vector2;
     itemName: ItemName;
 }>();
+
+export const CLoaded = covenant.worldComponent<true>();
+
+export const CWillPlay = covenant.worldComponent<true>();
+
+export const IdRoundSystem = covenant.worldComponent<true>();
+export const CRoundSystem = covenant.worldComponent<{
+    roundEnd?: number;
+    intermissionEnd?: number;
+    loadingIntermission?: boolean;
+    loadingRound?: boolean;
+}>();
+
+export const CInRound = covenant.worldComponent<{ gridServerEntity: Entity }>();

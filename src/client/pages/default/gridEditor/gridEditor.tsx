@@ -4,7 +4,7 @@ import { useComponent } from "client/hooks/useComponent";
 import { usePlayerEntity } from "client/hooks/usePlayerEntity";
 import { CInventory } from "shared/covenant/components/_list";
 import { Dragger } from "./dragger";
-import { BG_1, FG_1 } from "shared/constants/themes";
+import { BG_1, FG_1, FONT_1 } from "shared/constants/themes";
 import { ItemName, Items } from "shared/datas/items";
 import { ItemFrame } from "client/components/itemFrame";
 
@@ -27,6 +27,8 @@ function ItemSlot({
                 },
             }}
             Text={""}
+            Font={FONT_1}
+            TextXAlignment={"Center"}
         >
             <ItemFrame
                 itemOrigin={Items[itemName].origin}
@@ -42,6 +44,8 @@ function ItemSlot({
                 BorderSizePixel={0}
                 Text={Items[itemName].displayName}
                 TextColor3={FG_1}
+                TextXAlignment={"Center"}
+                Font={FONT_1}
             />
         </textbutton>
     );

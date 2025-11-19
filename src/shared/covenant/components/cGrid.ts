@@ -1,11 +1,16 @@
 import { RunService } from "@rbxts/services";
 import { covenant } from "../covenant";
-import { CGrid, IdGrid, IdPlayer } from "./_list";
-import { Entity } from "@rbxts/covenant";
+import { CGrid, CInRound, CModel, IdGrid, IdPlayer } from "./_list";
+import { Entity, InferComponent } from "@rbxts/covenant";
+import { getPvPrimaryPart } from "shared/utils/pvUtils";
+import Immut from "@rbxts/immut";
+import { trackComponent } from "shared/utils/trackComponent";
+
+//trackComponent(CGrid, "CGrid");
 
 covenant.defineComponent({
     component: CGrid,
-    queriedComponents: [[IdGrid]],
+    queriedComponents: [[IdGrid, CModel]],
     replicated: true,
     predictionValidator: false,
     recipe: (entity, lastState, updateId, { useComponentChange }) => {
@@ -13,19 +18,33 @@ covenant.defineComponent({
             return lastState;
         }
 
-        let owner: Entity | undefined = undefined;
-        for (const [playerEntity] of covenant.worldQuery(IdPlayer)) {
-            owner = playerEntity;
-        }
+        const model = covenant.worldGet(entity, CModel)!;
+        const part = getPvPrimaryPart(model);
 
-        useComponentChange(updateId, IdPlayer).forEach(({ entity, state }) => {
-            if (state === undefined) return;
-            owner = entity;
-        });
-
-        return {
-            owner: owner,
-            size: new Vector2(100, 100),
+        let newState: InferComponent<typeof CGrid> = lastState ?? {
+            size: part
+                ? new Vector2(part.ExtentsSize.X, part.ExtentsSize.Z)
+                : new Vector2(100, 100),
         };
+
+        useComponentChange(updateId, CInRound).forEach(
+            ({ entity: playerEntity, state, previousState }) => {
+                if (
+                    state === undefined &&
+                    previousState !== undefined &&
+                    previousState.gridServerEntity === entity
+                ) {
+                    newState = Immut.produce(newState, (draft) => {
+                        draft.ownerServerEntity = undefined;
+                    });
+                } else if (state !== undefined && state.gridServerEntity === entity) {
+                    newState = Immut.produce(newState, (draft) => {
+                        draft.ownerServerEntity = playerEntity;
+                    });
+                }
+            },
+        );
+
+        return newState;
     },
 });

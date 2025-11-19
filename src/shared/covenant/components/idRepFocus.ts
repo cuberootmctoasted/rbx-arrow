@@ -7,29 +7,20 @@ import { IdRepFocus, RepFocusData } from "./_list";
 covenant.defineIdentity({
     identityComponent: IdRepFocus,
     replicated: true,
-    recipe: (entities, updateId, { useEvent, useChange }) => {
-        if (!RunService.IsServer()) {
-            return {};
-        }
+    lifetime: (entity, state, despawn) => {
+        const connection = Players.PlayerRemoving.Connect((player) => {
+            if (state.player !== state.player) return;
+            state.part?.Destroy();
+            despawn();
+        });
+        return () => {
+            connection.Disconnect();
+        };
+    },
+    factory: (spawnEntity) => {
+        if (!RunService.IsServer()) return;
 
-        const statesToAdd: RepFocusData[] = [];
-        const statesToRemove: RepFocusData[] = [];
-
-        const playersAdded = useEvent(updateId, Players, Players.PlayerAdded).map(
-            ([player]) => player,
-        );
-
-        if (useChange(updateId, [], "Once")) {
-            Players.GetPlayers().forEach((player) => {
-                playersAdded.push(player);
-            });
-        }
-
-        const playersRemoved = useEvent(updateId, Players, Players.PlayerRemoving).map(
-            ([player]) => player,
-        );
-
-        playersAdded.forEach((player) => {
+        function sp(player: Player) {
             const part = Make("Part", {
                 Name: "RepFocus-" + player.Name,
                 Size: new Vector3(1, 1, 1),
@@ -44,16 +35,15 @@ covenant.defineIdentity({
             pseudoAnchor(part, true);
             part.SetNetworkOwner(player);
             player.ReplicationFocus = part;
-            statesToAdd.push({ player: player, part: part });
+            spawnEntity({ player, part });
+        }
+
+        Players.PlayerAdded.Connect((player) => {
+            sp(player);
         });
 
-        playersRemoved.forEach((player) => {
-            entities.forEach((entity, state) => {
-                if (state.player !== player) return;
-                statesToRemove.push(state);
-            });
+        Players.GetPlayers().forEach((player) => {
+            sp(player);
         });
-
-        return { statesToCreate: statesToAdd, statesToDelete: statesToRemove };
     },
 });
