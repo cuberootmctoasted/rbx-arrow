@@ -12,9 +12,9 @@ import { Transition } from "client/components/transition";
 import { useComponent } from "client/hooks/useComponent";
 import { usePlayerEntity } from "client/hooks/usePlayerEntity";
 import { MotionVariantOptions, useTransition } from "client/hooks/useTransition";
+import { clientState } from "shared/clientState";
 import { BG_1 } from "shared/constants/themes";
 import { CPage } from "shared/covenant/components/_list";
-import { updateInputs } from "shared/inputs";
 
 const ASSETS: Instance[] = [Workspace, ReplicatedStorage.WaitForChild("assets")];
 
@@ -74,9 +74,7 @@ export function Preload() {
         task.wait(5);
         setReady(true);
         task.wait(1);
-        updateInputs((inputs) => {
-            inputs.preloaded = true;
-        });
+        clientState.loaded = true;
     }, [visible]);
 
     return (

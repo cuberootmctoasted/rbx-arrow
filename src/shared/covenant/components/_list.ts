@@ -1,11 +1,9 @@
-import { Inputs } from "shared/inputs";
 import { covenant } from "../covenant";
 import { Page } from "shared/pages";
 import { PlayerSave } from "../playerSave";
 import { Entity } from "@rbxts/covenant";
 import { ItemName } from "shared/datas/items";
 
-export const CInputs = covenant.worldComponent<Readonly<Inputs>>();
 export const CLocalRepFocus = covenant.worldComponent<true>();
 export const CModel = covenant.worldComponent<PVInstance>();
 export const CPage = covenant.worldComponent<Page>();
@@ -16,6 +14,10 @@ export interface RepFocusData {
     player: Player;
 }
 export const IdRepFocus = covenant.worldComponent<RepFocusData>();
+
+export const CInputGoToIsland = covenant.worldComponent<number>();
+export const CInputGoToLobby = covenant.worldComponent<number>();
+export const CInputPlace = covenant.worldComponent<{ position: Vector2; guid: string }>();
 
 export const IdGrid = covenant.worldComponent<{ data?: PVInstance }>();
 export const CGrid = covenant.worldComponent<{ size: Vector2; ownerServerEntity?: Entity }>();

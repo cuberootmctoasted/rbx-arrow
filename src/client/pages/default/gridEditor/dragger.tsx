@@ -3,14 +3,15 @@ import { getBindingValue, useBindingListener, useLatest } from "@rbxts/pretty-re
 import React, { useBinding, useEffect, useMemo, useReducer, useRef, useState } from "@rbxts/react";
 import { Players, RunService, UserInputService, Workspace } from "@rbxts/services";
 import { useComponent } from "client/hooks/useComponent";
+import { clientState } from "shared/clientState";
 import { ERR_1, OK_1 } from "shared/constants/themes";
 import { covenant } from "shared/covenant";
 import { CGrid, CModel, IdPlacement } from "shared/covenant/components/_list";
 import { entityParts } from "shared/covenant/entityParts";
 import { ItemName, Items } from "shared/datas/items";
 import { getPlacementCf } from "shared/datas/placement";
-import { updateInputs } from "shared/inputs";
 import { getPvPrimaryPart } from "shared/utils/pvUtils";
+import { syncedTime } from "shared/utils/syncedTime";
 
 function setModelTransparency(model: PVInstance, transparency: number) {
     if (model.IsA("BasePart")) {
@@ -105,12 +106,18 @@ export function Dragger({
         };
     }, [model]);
 
+    useBindingListener(hoveringPosition, (pos) => {
+        clientState.draggerData.position = pos;
+    });
+
+    useEffect(() => {
+        clientState.draggerData.guid = itemGuid;
+    }, [itemGuid]);
+
     useEffect(() => {
         if (!canPlace) return;
         const connection = mouse.Button1Down.Connect(() => {
-            updateInputs((inputs) => {
-                inputs.place = { guid: itemGuid, position: getBindingValue(hoveringPosition) };
-            });
+            clientState.inputs.place = syncedTime();
         });
         return () => {
             connection.Disconnect();

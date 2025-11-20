@@ -2,7 +2,6 @@ import { RunService } from "@rbxts/services";
 import { covenant } from "../covenant";
 import { CInRound, CRoundSystem, CWillPlay, IdGrid, IdPlayer } from "./_list";
 import { Entity } from "@rbxts/covenant";
-import { trackComponent } from "shared/utils/trackComponent";
 
 //trackComponent(CInRound, "InRound");
 

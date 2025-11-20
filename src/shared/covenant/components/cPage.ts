@@ -1,10 +1,10 @@
 import { RunService } from "@rbxts/services";
 import { covenant } from "../covenant";
-import { CInputs, CPage, IdPlayer } from "./_list";
+import { CLoaded, CPage, IdPlayer } from "./_list";
 
 covenant.defineComponent({
     component: CPage,
-    queriedComponents: [[IdPlayer, CInputs]],
+    queriedComponents: [[IdPlayer]],
     replicated: true,
     predictionValidator: false,
     recipe: (
@@ -17,8 +17,10 @@ covenant.defineComponent({
             return lastState;
         }
 
-        const inputs = covenant.worldGet(entity, CInputs);
-        if (!inputs?.preloaded) {
+        useComponentChange(updateId, CLoaded);
+        const loaded = covenant.worldGet(entity, CLoaded);
+
+        if (!loaded) {
             return "preload";
         }
 

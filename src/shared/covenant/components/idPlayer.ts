@@ -1,7 +1,6 @@
 import { Players, RunService } from "@rbxts/services";
 import { covenant } from "..";
 import { IdPlayer } from "./_list";
-import { selfDisconnectConnection } from "shared/utils/selfDisconnectConnection";
 
 covenant.defineIdentity({
     identityComponent: IdPlayer,

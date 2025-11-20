@@ -1,6 +1,6 @@
 import { RunService } from "@rbxts/services";
 import { covenant } from "../covenant";
-import { CGrid, CInputs, CInventory, CModel, CRoundSystem, IdPlacement } from "./_list";
+import { CGrid, CInputPlace, CInventory, CModel, CRoundSystem, IdPlacement } from "./_list";
 import { Entity } from "@rbxts/covenant";
 
 //trackComponent(IdPlacement, "IdPlacement");
@@ -34,17 +34,17 @@ covenant.defineIdentity({
             ownerGridMap.set(tostring(state.ownerServerEntity), entity);
         });
 
-        covenant.subscribeComponent(CInputs, (entity, state) => {
-            if (state?.place === undefined) return;
+        covenant.subscribeComponent(CInputPlace, (entity, state) => {
+            if (state === undefined) return;
             const inventory = covenant.worldGet(entity, CInventory);
             if (inventory === undefined) return;
-            const itemName = inventory.get(state.place.guid);
+            const itemName = inventory.get(state.guid);
             if (itemName === undefined) return;
             const grid = ownerGridMap.get(tostring(entity));
             if (grid === undefined) return;
             spawnEntity({
                 itemName: itemName,
-                position: state.place.position,
+                position: state.position,
                 gridServerEntity: grid,
             });
         });
