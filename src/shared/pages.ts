@@ -1,1 +1,1 @@
-export type Page = "playing" | "preload";
+export type Page = "playing" | "preload" | "start";

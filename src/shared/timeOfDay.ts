@@ -1,7 +1,7 @@
 import { RunService } from "@rbxts/services";
 import { syncedTime } from "./utils/syncedTime";
 
-export const DAY_NIGHT_CYCLE_MINUTES = 0.5;
+export const DAY_NIGHT_CYCLE_MINUTES = 30;
 
 export interface TimeOfDay {
     hours: number;

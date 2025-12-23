@@ -71,9 +71,11 @@ export function Preload() {
             });
         }
         ContentProvider.PreloadAsync(ASSETS);
-        task.wait(5);
-        setReady(true);
+        if (!RunService.IsStudio()) {
+            task.wait(5);
+        }
         task.wait(1);
+        setReady(true);
         clientState.loaded = true;
     }, [visible]);
 

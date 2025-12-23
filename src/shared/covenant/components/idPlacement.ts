@@ -1,6 +1,6 @@
 import { RunService } from "@rbxts/services";
 import { covenant } from "../covenant";
-import { CGrid, CInputPlace, CInventory, CModel, CRoundSystem, IdPlacement } from "./_list";
+import { CGrid, CInputPlace, CInventory, CModel, IdPlacement } from "./_list";
 import { Entity } from "@rbxts/covenant";
 
 //trackComponent(IdPlacement, "IdPlacement");
@@ -9,15 +9,7 @@ covenant.defineIdentity({
     identityComponent: IdPlacement,
     replicated: true,
     lifetime: (entity, state, despawn) => {
-        const unsubscribe = covenant.subscribeComponent(CRoundSystem, (_, roundSystem) => {
-            if (roundSystem?.loadingIntermission === undefined) return;
-            const model = covenant.worldGet(entity, CModel);
-            model?.Destroy();
-            despawn();
-        });
-        return () => {
-            unsubscribe();
-        };
+        return () => {};
     },
     factory: (spawnEntity) => {
         if (!RunService.IsServer()) return;
@@ -42,6 +34,7 @@ covenant.defineIdentity({
             if (itemName === undefined) return;
             const grid = ownerGridMap.get(tostring(entity));
             if (grid === undefined) return;
+            print(grid);
             spawnEntity({
                 itemName: itemName,
                 position: state.position,

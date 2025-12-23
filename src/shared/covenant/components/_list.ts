@@ -18,6 +18,7 @@ export const IdRepFocus = covenant.worldComponent<RepFocusData>();
 export const CInputGoToIsland = covenant.worldComponent<number>();
 export const CInputGoToLobby = covenant.worldComponent<number>();
 export const CInputPlace = covenant.worldComponent<{ position: Vector2; guid: string }>();
+export const CInputStart = covenant.worldComponent<number>();
 
 export const IdGrid = covenant.worldComponent<{ data?: PVInstance }>();
 export const CGrid = covenant.worldComponent<{ size: Vector2; ownerServerEntity?: Entity }>();
@@ -34,12 +35,4 @@ export const CLoaded = covenant.worldComponent<true>();
 
 export const CWillPlay = covenant.worldComponent<true>();
 
-export const IdRoundSystem = covenant.worldComponent<true>();
-export const CRoundSystem = covenant.worldComponent<{
-    roundEnd?: number;
-    intermissionEnd?: number;
-    loadingIntermission?: boolean;
-    loadingRound?: boolean;
-}>();
-
-export const CInRound = covenant.worldComponent<{ gridServerEntity: Entity }>();
+export const CPlace = covenant.worldComponent<"lobby" | "island">();

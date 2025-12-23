@@ -1,11 +1,10 @@
 import { Players, RunService } from "@rbxts/services";
 import { covenant } from "../covenant";
-import { CInputGoToIsland, CInputGoToLobby, CInputPlace, IdPlayer } from "./_list";
+import { CInputGoToIsland, CInputGoToLobby, CInputStart, IdPlayer } from "./_list";
 import { clientState } from "shared/clientState";
-import Sift from "@rbxts/sift";
 
 covenant.defineComponent({
-    component: CInputPlace,
+    component: CInputStart,
     queriedComponents: [[IdPlayer]],
     replicated: false,
     predictionValidator: () => true,
@@ -13,7 +12,7 @@ covenant.defineComponent({
         if (!RunService.IsClient()) return lastState;
         if (covenant.worldGet(entity, IdPlayer) !== Players.LocalPlayer) return lastState;
         useEvent(updateId, RunService, RunService.Heartbeat);
-        if (!useChange(updateId, [clientState.inputs.place], "")) return lastState;
-        return Sift.Dictionary.copy(clientState.draggerData);
+        if (!useChange(updateId, [clientState.inputs.start], "")) return lastState;
+        return clientState.inputs.start;
     },
 });

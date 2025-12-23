@@ -8,6 +8,7 @@ export interface ClientState {
         goToIsland: number;
         goToLobby: number;
         place: number;
+        start: number;
     };
 }
 
@@ -21,5 +22,6 @@ export const clientState: ClientState = {
         goToIsland: -1,
         goToLobby: -1,
         place: -1,
+        start: -1,
     },
 };

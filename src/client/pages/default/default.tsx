@@ -7,14 +7,13 @@ import { MovementController } from "client/controllers/movementController";
 import { useComponent } from "client/hooks/useComponent";
 import { usePlayerEntity } from "client/hooks/usePlayerEntity";
 import { MotionVariantOptions, useTransition } from "client/hooks/useTransition";
-import { CGrid, CInRound, CModel, CPage } from "shared/covenant/components/_list";
+import { CGrid, CModel, CPage } from "shared/covenant/components/_list";
 import { GridEditor } from "./gridEditor/gridEditor";
 import { covenant } from "shared/covenant";
 import { Entity } from "@rbxts/covenant";
 import { ClassicCameraController } from "client/controllers/classicCameraController";
 import { DayNightMusic } from "./dayNightMusic";
-import { useRoundSystem } from "client/hooks/useRoundSystem";
-import { RoundTimer } from "./roundTimer";
+import { PartFrame } from "client/components/partFrame";
 
 export function DefaultPage() {
     const playerEntity = usePlayerEntity();
@@ -28,18 +27,6 @@ export function DefaultPage() {
 
     const character = useComponent(playerEntity, CModel);
     const humanoid = useMemo(() => character?.FindFirstChildWhichIsA("Humanoid"), [character]);
-
-    const roundSystem = useRoundSystem();
-    const inRound = useComponent(playerEntity, CInRound);
-    const previousInRound = usePrevious(inRound);
-
-    const inTransition = useMemo(() => {
-        if (roundSystem === undefined) return false;
-        return (
-            (roundSystem.loadingRound && inRound !== undefined) ||
-            (roundSystem.loadingIntermission && previousInRound !== undefined)
-        );
-    }, [roundSystem, inRound, previousInRound]);
 
     const [grid, setGrid] = useState<Entity>();
 
@@ -66,17 +53,13 @@ export function DefaultPage() {
             unsubcribe();
         };
     }, [playerEntity]);
+    print(covenant.getServerEntity(grid ?? (-1 as Entity)));
 
     return (
         <Screen>
-            <Transition groupTransparency={lerpBinding(transition, 1, 0)}>
-                <RoundTimer />
-            </Transition>
-            {visible && !inTransition && character && (
-                <ClassicCameraController character={character} />
-            )}
-            {visible && !inTransition && humanoid && <MovementController humanoid={humanoid} />}
-            {visible && !inTransition && grid !== undefined && <GridEditor grid={grid} />}
+            {visible && character && <ClassicCameraController character={character} />}
+            {visible && humanoid && <MovementController humanoid={humanoid} />}
+            {visible && grid !== undefined && <GridEditor grid={grid} />}
             {visible && <DayNightMusic />}
         </Screen>
     );
