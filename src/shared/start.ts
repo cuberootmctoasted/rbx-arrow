@@ -3,6 +3,8 @@ import { covenant } from "./covenant";
 import { path } from "./utils/path";
 
 export function start() {
+    // TODO: more bugs here
+
     function traverseScripts(folder: Instance) {
         folder
             .GetDescendants()

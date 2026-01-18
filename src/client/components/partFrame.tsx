@@ -84,6 +84,7 @@ export function PartFrame({
             PixelsPerStud={pixelPerStud}
             LightInfluence={lightInfluence}
             Face={"Back"}
+            ZIndexBehavior={"Sibling"}
         >
             {children}
         </surfacegui>

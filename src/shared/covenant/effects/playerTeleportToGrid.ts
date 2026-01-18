@@ -1,6 +1,6 @@
 import { RunService, Workspace } from "@rbxts/services";
 import { covenant } from "../covenant";
-import { CGrid, CModel, CPlace } from "../components/_list";
+import { CGrid, CModel, COwnedByGrid, CPlace } from "../components/_list";
 import { Entity } from "@rbxts/covenant";
 
 if (RunService.IsServer()) {
@@ -17,8 +17,8 @@ if (RunService.IsServer()) {
             character.PivotTo(spawn.GetPivot().add(new Vector3(0, 2, 0)));
         } else {
             let grid: Entity | undefined = undefined;
-            for (const [e, cGrid] of covenant.worldQuery(CGrid)) {
-                if (cGrid.ownerServerEntity === entity) {
+            for (const [e, { ownerServerEntity }] of covenant.worldQuery(COwnedByGrid)) {
+                if (ownerServerEntity === entity) {
                     grid = e;
                     break;
                 }

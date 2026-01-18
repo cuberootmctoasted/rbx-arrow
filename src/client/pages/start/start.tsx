@@ -66,7 +66,7 @@ export function StartPage() {
                         text={"START"}
                         offset={-2}
                         onClick={() => {
-                            clientState.inputs.start = syncedTime();
+                            clientState.inputs.play = syncedTime();
                         }}
                     />
                     <Button text={"what"} offset={-1} />

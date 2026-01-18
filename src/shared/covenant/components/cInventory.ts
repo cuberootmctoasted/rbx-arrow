@@ -1,6 +1,6 @@
 import { HttpService, RunService } from "@rbxts/services";
 import { covenant } from "../covenant";
-import { CInputPlace, CInventory, IdPlayer } from "./_list";
+import { CInputPlace, CInRound, CInventory, IdPlayer } from "./_list";
 import Immut from "@rbxts/immut";
 
 covenant.defineComponent({
@@ -13,10 +13,15 @@ covenant.defineComponent({
             return lastState;
         }
 
-        useComponentChange(updateId, CInputPlace);
+        useComponentChange(updateId, CInputPlace, false);
         const place = covenant.worldGet(entity, CInputPlace);
 
-        if (lastState === undefined) {
+        const roundChanges = useComponentChange(updateId, CInRound, false);
+
+        if (
+            lastState === undefined ||
+            !roundChanges.filter(({ entity: e }) => entity === e).isEmpty()
+        ) {
             return new ReadonlyMap([
                 [HttpService.GenerateGUID(false), "basicCollector" as const],
                 [HttpService.GenerateGUID(false), "basicDropper" as const],

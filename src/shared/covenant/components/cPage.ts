@@ -1,6 +1,6 @@
 import { RunService } from "@rbxts/services";
 import { covenant } from "../covenant";
-import { CInputStart, CLoaded, CPage, IdPlayer } from "./_list";
+import { CInputPlay, CLoaded, CPage, IdPlayer } from "./_list";
 import { clientState } from "shared/clientState";
 
 covenant.defineComponent({
@@ -18,19 +18,19 @@ covenant.defineComponent({
             return lastState;
         }
 
-        useComponentChange(updateId, CLoaded);
-        useComponentChange(updateId, CInputStart);
+        useComponentChange(updateId, CLoaded, true);
+        useComponentChange(updateId, CInputPlay, false);
         const loaded = covenant.worldGet(entity, CLoaded);
-        const inputStart = covenant.worldGet(entity, CInputStart);
+        const inputStart = covenant.worldGet(entity, CInputPlay);
 
         if (!loaded) {
             return "preload";
         }
 
-        if (lastState === "start" && inputStart !== undefined && inputStart > 0) {
-            return "playing";
+        if (lastState === "preload" && (inputStart === undefined || inputStart <= 0)) {
+            return "start";
         }
 
-        return "start";
+        return "playing";
     },
 });

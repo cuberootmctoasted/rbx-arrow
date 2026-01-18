@@ -53,7 +53,8 @@ export function Dragger({
     const cGrid = useComponent(grid ?? (-1 as Entity), CGrid);
     const gridPv = useComponent(grid ?? (-1 as Entity), CModel);
     const mouse = useMemo(() => {
-        return Players.LocalPlayer.GetMouse();
+        const m = Players.LocalPlayer.GetMouse();
+        return m;
     }, []);
     const [hoveringPosition, setHoveringPosition] = useBinding<Vector2>(Vector2.zero);
 
@@ -150,7 +151,15 @@ export function Dragger({
         if (gridPv === undefined) return;
         if (cGrid === undefined) return;
 
+        mouse.TargetFilter = undefined;
         const connection = RunService.Heartbeat.Connect(() => {
+            if (
+                mouse.Target !== undefined &&
+                (mouse.Target.CanCollide === false || mouse.Target.Anchored === false)
+            ) {
+                mouse.TargetFilter = mouse.Target;
+                return;
+            }
             const targetPosition = mouse.Hit.Position;
             if (RunService.IsStudio()) {
                 // drawLine(targetPosition, temp.current);
@@ -169,7 +178,7 @@ export function Dragger({
         return () => {
             connection.Disconnect();
         };
-    }, [gridPv]);
+    }, [gridPv, cGrid]);
 
     return <></>;
 }

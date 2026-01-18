@@ -1,9 +1,6 @@
-import { CollectionService, RunService, Workspace } from "@rbxts/services";
+import { CollectionService, RunService } from "@rbxts/services";
 import { covenant } from "../covenant";
-import { CModel, IdGrid } from "./_list";
-import { SERVER_ENTITY_ATTRIBUTE_NAME } from "./cModel";
-import { Entity, InferComponent } from "@rbxts/covenant";
-import { selfDisconnectConnection } from "shared/utils/selfDisconnectConnection";
+import { IdGrid } from "./_list";
 
 covenant.defineIdentity({
     identityComponent: IdGrid,

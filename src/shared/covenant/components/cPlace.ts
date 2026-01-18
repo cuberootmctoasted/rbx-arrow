@@ -7,8 +7,8 @@ covenant.defineComponent({
     replicated: true,
     predictionValidator: false,
     recipe: (entity, lastState, updateId, { useEvent, useComponentChange }) => {
-        const goToLobbies = useComponentChange(updateId, CInputGoToLobby);
-        const goToIslands = useComponentChange(updateId, CInputGoToIsland);
+        const goToLobbies = useComponentChange(updateId, CInputGoToLobby, false);
+        const goToIslands = useComponentChange(updateId, CInputGoToIsland, false);
         if (lastState === undefined) return "lobby";
         if (!goToLobbies.filter(({ entity: e }) => entity === e).isEmpty()) {
             return "lobby";

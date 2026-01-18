@@ -7,13 +7,14 @@ import { MovementController } from "client/controllers/movementController";
 import { useComponent } from "client/hooks/useComponent";
 import { usePlayerEntity } from "client/hooks/usePlayerEntity";
 import { MotionVariantOptions, useTransition } from "client/hooks/useTransition";
-import { CGrid, CModel, CPage } from "shared/covenant/components/_list";
+import { CGrid, CInRound, CModel, COwnedGrid, CPage } from "shared/covenant/components/_list";
 import { GridEditor } from "./gridEditor/gridEditor";
 import { covenant } from "shared/covenant";
 import { Entity } from "@rbxts/covenant";
 import { ClassicCameraController } from "client/controllers/classicCameraController";
 import { DayNightMusic } from "./dayNightMusic";
 import { PartFrame } from "client/components/partFrame";
+import { RoundSystem } from "./roundSystem";
 
 export function DefaultPage() {
     const playerEntity = usePlayerEntity();
@@ -28,39 +29,23 @@ export function DefaultPage() {
     const character = useComponent(playerEntity, CModel);
     const humanoid = useMemo(() => character?.FindFirstChildWhichIsA("Humanoid"), [character]);
 
-    const [grid, setGrid] = useState<Entity>();
+    const cOwnedGrid = useComponent(playerEntity, COwnedGrid);
 
-    useEffect(() => {
-        for (const [entity, state] of covenant.worldQuery(CGrid)) {
-            if (
-                state.ownerServerEntity !== undefined &&
-                covenant.getClientEntity(state?.ownerServerEntity) === playerEntity
-            ) {
-                setGrid(entity);
-            }
-        }
-
-        const unsubcribe = covenant.subscribeComponent(CGrid, (entity, state) => {
-            if (
-                state?.ownerServerEntity !== undefined &&
-                covenant.getClientEntity(state?.ownerServerEntity) === playerEntity
-            ) {
-                setGrid(entity);
-            }
-        });
-
-        return () => {
-            unsubcribe();
-        };
-    }, [playerEntity]);
-    print(covenant.getServerEntity(grid ?? (-1 as Entity)));
+    const inRound = useComponent(playerEntity, CInRound);
+    const roundGrid = useMemo(() => {
+        if (inRound === undefined) return undefined;
+        return covenant.getClientEntity(inRound.gridServerEntity);
+    }, [inRound]);
 
     return (
         <Screen>
             {visible && character && <ClassicCameraController character={character} />}
             {visible && humanoid && <MovementController humanoid={humanoid} />}
-            {visible && grid !== undefined && <GridEditor grid={grid} />}
+            {visible && inRound !== undefined && roundGrid !== undefined && (
+                <GridEditor grid={roundGrid} />
+            )}
             {visible && <DayNightMusic />}
+            {visible && <RoundSystem />}
         </Screen>
     );
 }

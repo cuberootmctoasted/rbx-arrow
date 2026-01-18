@@ -2,7 +2,7 @@ import { Entity } from "@rbxts/covenant";
 import { useEffect, useState } from "@rbxts/react";
 import { covenant } from "shared/covenant";
 
-export function useComponent<T>(entity: Entity, component: Entity<T>) {
+export function useComponent<T extends defined>(entity: Entity, component: Entity<T>) {
     const [state, setState] = useState(covenant.worldGet(entity, component));
 
     useEffect(() => {
